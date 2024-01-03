@@ -4,23 +4,31 @@ import app.cash.turbine.test
 import assertk.assertThat
 import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
+import com.ivy.core.domain.MainCoroutineExtension
+import com.ivy.core.domain.TestDispatchers
 import com.ivy.core.domain.action.settings.basecurrency.BaseCurrencyFlow
-import com.ivy.core.persistence.dao.exchange.ExchangeRateOverrideDao
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.RegisterExtension
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ExchangeRatesFlowTest {
 
     private lateinit var exchangeRatesFlow: ExchangeRatesFlow
     private lateinit var baseCurrencyFlow: BaseCurrencyFlow
     private lateinit var exchangeRateDao: ExchangeRateDaoFake
     private lateinit var exchangeRateOverrideDao: ExchangeRateOverrideDaoFake
+
+    companion object {
+        @JvmField
+        @RegisterExtension
+        val mainCoroutineExtension = MainCoroutineExtension()
+    }
 
     @BeforeEach
     fun setUp() {
@@ -30,12 +38,14 @@ class ExchangeRatesFlowTest {
         exchangeRateDao = ExchangeRateDaoFake()
         exchangeRateOverrideDao = ExchangeRateOverrideDaoFake()
 
+        //add test thread
+        val testDispatchers = TestDispatchers(mainCoroutineExtension.testDispatcher)
 
         exchangeRatesFlow = ExchangeRatesFlow(
             baseCurrencyFlow = baseCurrencyFlow,
             exchangeRateDao = exchangeRateDao,
             exchangeRateOverrideDao = exchangeRateOverrideDao,
-            //dispatchers = Dispatchers.Default
+            dispatchers = testDispatchers
         )
 
     }
