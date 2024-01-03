@@ -35,7 +35,7 @@ class ExchangeRatesFlow @Inject constructor(
     @OptIn(FlowPreview::class)
     override fun createFlow(): Flow<ExchangeRates> =
         baseCurrencyFlow().flatMapLatest { baseCurrency ->
-            combine(
+            combine(//combine 用法：括號內的參數類型flow只要有其中一個產生新的emission，大括號內(L:41-57)的code就會驅動
                 exchangeRateDao.findAllByBaseCurrency(baseCurrency),
                 exchangeRateOverrideDao.findAllByBaseCurrency(baseCurrency)
             ) { rateEntities, ratesOverride ->
@@ -47,7 +47,7 @@ class ExchangeRatesFlow @Inject constructor(
                 ratesOverride.filter { it.baseCurrency == baseCurrency }
                     .onEach {
                         // override automatic rates by manually set ones
-                        ratesMap[it.currency] = it.rate
+                        ratesMap[it.currency] = it.rate//更新新的匯率
                     }
 
                 ExchangeRates(
