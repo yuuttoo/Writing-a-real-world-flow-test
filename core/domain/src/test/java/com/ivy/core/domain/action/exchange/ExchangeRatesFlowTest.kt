@@ -1,8 +1,19 @@
 package com.ivy.core.domain.action.exchange
 
+import app.cash.turbine.test
+import assertk.assertThat
+import assertk.assertions.hasSize
+import assertk.assertions.isEqualTo
 import com.ivy.core.domain.action.settings.basecurrency.BaseCurrencyFlow
 import com.ivy.core.persistence.dao.exchange.ExchangeRateOverrideDao
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 class ExchangeRatesFlowTest {
 
@@ -11,6 +22,66 @@ class ExchangeRatesFlowTest {
     private lateinit var exchangeRateDao: ExchangeRateDaoFake
     private lateinit var exchangeRateOverrideDao: ExchangeRateOverrideDaoFake
 
+    @BeforeEach
+    fun setUp() {
+        baseCurrencyFlow = mockk()
+        every { baseCurrencyFlow.invoke() } returns flowOf("", "EUR")
+
+        exchangeRateDao = ExchangeRateDaoFake()
+        exchangeRateOverrideDao = ExchangeRateOverrideDaoFake()
+
+
+        exchangeRatesFlow = ExchangeRatesFlow(
+            baseCurrencyFlow = baseCurrencyFlow,
+            exchangeRateDao = exchangeRateDao,
+            exchangeRateOverrideDao = exchangeRateOverrideDao,
+            //dispatchers = Dispatchers.Default
+        )
+
+    }
+
+    @Test
+    fun `Test exchange rates flow emissions`() = runTest {
+        val exchangeRates = listOf(//mock data
+            exchangeRateEntity("USD", 1.3),
+            exchangeRateEntity("CAD", 1.7),
+            exchangeRateEntity("AUD", 1.9)
+        )
+
+        val exchangeRateOverrides = listOf(//mock overrides
+            exchangeRateOverrideEntity("CAD", 1.5)
+        )
+
+        exchangeRatesFlow().test {
+            awaitItem()
+
+            exchangeRateDao.save(exchangeRates)
+            exchangeRateOverrideDao.save(exchangeRateOverrides)
+            val rates1 = awaitItem()
+
+            assertThat(rates1.rates).hasSize(3)
+            assertThat(rates1.rates["USD"]).isEqualTo(1.3)
+            assertThat(rates1.rates["CAD"]).isEqualTo(1.5)
+            assertThat(rates1.rates["AUD"]).isEqualTo(1.9)
+
+            exchangeRateOverrideDao.save(emptyList())
+
+            val rates2 = awaitItem()
+
+            assertThat(rates2.rates).hasSize(3)
+            assertThat(rates2.rates["USD"]).isEqualTo(1.3)
+            assertThat(rates2.rates["CAD"]).isEqualTo(1.7)
+            assertThat(rates2.rates["AUD"]).isEqualTo(1.9)
+
+
+
+        }
+
+
+
+
+
+    }
 
 
 
