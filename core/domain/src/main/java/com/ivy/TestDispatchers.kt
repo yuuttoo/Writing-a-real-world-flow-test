@@ -1,4 +1,4 @@
-package com.ivy.core.domain
+package com.ivy
 
 import com.ivy.core.domain.pure.util.DispatcherProvider
 import kotlinx.coroutines.CoroutineDispatcher

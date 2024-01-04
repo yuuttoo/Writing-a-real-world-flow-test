@@ -5,7 +5,7 @@ import assertk.assertThat
 import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
 import com.ivy.core.domain.MainCoroutineExtension
-import com.ivy.core.domain.TestDispatchers
+import com.ivy.TestDispatchers
 import com.ivy.core.domain.action.settings.basecurrency.BaseCurrencyFlow
 import io.mockk.every
 import io.mockk.mockk
@@ -47,7 +47,6 @@ class ExchangeRatesFlowTest {
             exchangeRateOverrideDao = exchangeRateOverrideDao,
             dispatchers = testDispatchers
         )
-
     }
 
     @Test
