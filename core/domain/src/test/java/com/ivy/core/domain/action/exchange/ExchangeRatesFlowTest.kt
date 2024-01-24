@@ -4,7 +4,7 @@ import app.cash.turbine.test
 import assertk.assertThat
 import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
-import com.ivy.core.domain.MainCoroutineExtension
+import com.ivy.MainCoroutineExtension
 import com.ivy.TestDispatchers
 import com.ivy.core.domain.action.settings.basecurrency.BaseCurrencyFlow
 import io.mockk.every
@@ -48,6 +48,8 @@ class ExchangeRatesFlowTest {
             dispatchers = testDispatchers
         )
     }
+
+
 
     @Test
     fun `Test exchange rates flow emissions`() = runTest {

@@ -15,6 +15,8 @@ plugins {
 apply<com.ivy.buildsrc.IvyPlugin>()
 
 dependencies {
+    testImplementation(project(":exchange-rates"))
+    testImplementation(project(":exchange-rates"))
     Hilt()
     implementation(project(":common:main"))
     implementation(project(":core:persistence"))
